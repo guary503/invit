@@ -167,8 +167,6 @@
         </p>
     </div>
 
-    <!-- Modal de Restricción de Horario ELIMINADO -->
-
     <div id="attendanceModal" class="modal-overlay">
         <div class="modal-content">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Confirmar Asistencia</h2>
@@ -208,17 +206,6 @@
         const modalMessage = document.getElementById('modalMessage');
         const modalErrorMessage = document.getElementById('modalErrorMessage');
         
-        // Variables y listeners del modal de restricción de horario ELIMINADOS
-        // const timeRestrictionModal = document.getElementById('timeRestrictionModal');
-        // const closeTimeModalBtn = document.getElementById('closeTimeModalBtn');
-        // const timeRestrictionTitle = document.getElementById('timeRestrictionTitle');
-        // const timeRestrictionMessage = document.getElementById('timeRestrictionMessage');
-
-        // Lógica de 'DOMContentLoaded' para mostrar el modal de horario ELIMINADA
-        // document.addEventListener('DOMContentLoaded', () => { ... });
-        // closeTimeModalBtn.addEventListener('click', () => { ... });
-        // timeRestrictionModal.addEventListener('click', (event) => { ... });
-        
         function showAttendanceForm() {
             attendeeNameInput.value = ''; 
             attendeeAccompanimentsInput.value = '0'; 
@@ -232,11 +219,8 @@
         }
 
         confirmAttendanceBtn.addEventListener('click', () => {
-            // Limpiar mensajes previos
             modalMessage.classList.add('hidden');
             modalErrorMessage.classList.add('hidden');
-
-            // Mostrar directamente el formulario de asistencia
             showAttendanceForm();
         });
 
@@ -291,7 +275,7 @@
                 } else {
                     confirmationText += ` ha sido confirmada.`;
                 }
-                confirmationText += ` ¡Te esperamos! (Los datos han sido enviados a Google Forms).`;
+                confirmationText += ` ¡Te esperamos!`; // Texto simplificado
                 
                 modalMessage.textContent = confirmationText;
                 modalMessage.classList.remove('hidden');
