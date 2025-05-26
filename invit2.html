@@ -28,7 +28,7 @@
         .graduation-cap-icon {
             width: 75px;
             height: 75px;
-            fill: #555;
+            fill: #4A5568;
         }
         .confirm-button {
             background-image: linear-gradient(to right, #606060, #404040);
@@ -123,7 +123,7 @@
     </style>
 </head>
 <body class="bg-gray-100">
-    <div class="invite-card p-8 md:p-12 rounded-xl text-center space-y-6">
+    <div class="invite-card p-8 md:p-12 text-center space-y-6">
         <div class="flex justify-center mb-4">
             <svg class="graduation-cap-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22 10.5V6.5C22 6.22386 21.7761 6 21.5 6H2.5C2.22386 6 2 6.22386 2 6.5V10.5C2 10.7761 2.22386 11 2.5 11H21.5C21.7761 11 22 10.7761 22 10.5ZM12 14.5C12 14.7761 11.7761 15 11.5 15H2.5C2.22386 15 2 14.7761 2 14.5V10.5C2 10.2239 2.22386 10 2.5 10H11.5C11.7761 10 12 10.2239 12 10.5V14.5ZM21.5 15H12.5C12.2239 15 12 14.7761 12 14.5V10.5C12 10.2239 12.2239 10 12.5 10H21.5C21.7761 10 22 10.2239 22 10.5V14.5ZM12 18.5C12 18.7761 11.7761 19 11.5 19H2.5C2.22386 19 2 18.7761 2 18.5V14.5C2 14.2239 2.22386 14 2.5 14H11.5C11.7761 14 12 14.2239 12 14.5V18.5ZM21.5 19H12.5C12.2239 19 12 18.7761 12 18.5V14.5C12 14.2239 12.2239 14 12.5 14H21.5C21.7761 19 22 18.7761 22 18.5V14.5Z" fill="currentColor"/>
@@ -146,7 +146,7 @@
                 <span class="font-medium">Lugar de Celebración:</span> Mi casa
             </p>
             <p class="text-md text-gray-700">
-                <span class="font-medium">Fecha:</span> [Fecha del evento]
+                <span class="font-medium">Fecha:</span> [AQUÍ VA LA FECHA DEL EVENTO] <!-- << CAMBIA ESTO -->
             </p>
             <p class="text-md text-gray-700">
                 <span class="font-medium">Hora:</span> Por confirmar
@@ -167,18 +167,7 @@
         </p>
     </div>
 
-    <div id="timeRestrictionModal" class="modal-overlay">
-        <div class="modal-content">
-            <h2 id="timeRestrictionTitle" class="text-2xl font-bold text-gray-800 mb-4">Aviso Importante</h2>
-            <p id="timeRestrictionMessage" class="text-gray-600 mb-4">
-                La confirmación de asistencia solo está disponible entre las <span class="font-semibold">6:00 PM y las 10:00 PM</span>.
-                Agradecemos tu comprensión.
-            </p>
-            <button id="closeTimeModalBtn" class="modal-close-btn w-full">
-                Entendido
-            </button>
-        </div>
-    </div>
+    <!-- Modal de Restricción de Horario ELIMINADO -->
 
     <div id="attendanceModal" class="modal-overlay">
         <div class="modal-content">
@@ -188,8 +177,10 @@
             </p>
             <input type="text" id="attendeeNameInput" class="modal-input" placeholder="Tu nombre completo" required>
             <input type="number" id="attendeeAccompanimentsInput" class="modal-input" placeholder="Número de acompañantes (ej. 0, 1, 2)" min="0" value="0">
+            
             <div id="modalMessage" class="message-box hidden"></div>
             <div id="modalErrorMessage" class="error-message-box hidden"></div>
+            
             <div class="flex justify-end gap-2 mt-4">
                 <button id="submitAttendanceBtn" class="modal-submit-btn">
                     Enviar Confirmación
@@ -202,7 +193,12 @@
     </div>
 
     <script>
-        // Obtener referencias a los elementos del DOM
+        // --- CONFIGURACIÓN DE GOOGLE FORM ---
+        const GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSd-AmA-qhwHf2okYbWzjHjWxhLXKF3Hgd966SKGgDBwDc96SQ/formResponse';
+        const NAME_FIELD_ID = 'entry.429701227';
+        const ACCOMPANIMENTS_FIELD_ID = 'entry.769168078';
+        // --- FIN DE CONFIGURACIÓN ---
+
         const confirmAttendanceBtn = document.getElementById('confirmAttendanceBtn');
         const attendanceModal = document.getElementById('attendanceModal');
         const closeAttendanceModalBtn = document.getElementById('closeAttendanceModalBtn');
@@ -211,101 +207,37 @@
         const attendeeAccompanimentsInput = document.getElementById('attendeeAccompanimentsInput');
         const modalMessage = document.getElementById('modalMessage');
         const modalErrorMessage = document.getElementById('modalErrorMessage');
-        const attendanceInstructions = document.getElementById('attendanceInstructions');
-
-
-        const timeRestrictionModal = document.getElementById('timeRestrictionModal');
-        const closeTimeModalBtn = document.getElementById('closeTimeModalBtn');
-        const timeRestrictionTitle = document.getElementById('timeRestrictionTitle');
-        const timeRestrictionMessage = document.getElementById('timeRestrictionMessage');
-
-        const backendUrl = 'http://localhost:5000/submit_attendance'; // URL del backend
-
-        // --- Lógica del Modal de Horario de Confirmación (Aviso inicial) ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // Restaura el mensaje original del modal de restricción de horario
-            timeRestrictionTitle.textContent = 'Aviso Importante';
-            timeRestrictionMessage.innerHTML = 'La confirmación de asistencia solo está disponible entre las <span class="font-semibold">6:00 PM y las 10:00 PM</span>. Agradecemos tu comprensión.';
-            timeRestrictionModal.classList.add('show');
-        });
-
-        closeTimeModalBtn.addEventListener('click', () => {
-            timeRestrictionModal.classList.remove('show');
-        });
-
-        timeRestrictionModal.addEventListener('click', (event) => {
-            if (event.target === timeRestrictionModal) {
-                timeRestrictionModal.classList.remove('show');
-            }
-        });
         
-        // Función para mostrar el formulario de asistencia normal
-        function showAttendanceForm() {
-            attendanceInstructions.classList.remove('hidden'); // Mostrar instrucciones
-            attendeeNameInput.classList.remove('hidden'); // Mostrar input nombre
-            attendeeAccompanimentsInput.classList.remove('hidden'); // Mostrar input acompañantes
-            submitAttendanceBtn.classList.remove('hidden'); // Mostrar botón de envío
+        // Variables y listeners del modal de restricción de horario ELIMINADOS
+        // const timeRestrictionModal = document.getElementById('timeRestrictionModal');
+        // const closeTimeModalBtn = document.getElementById('closeTimeModalBtn');
+        // const timeRestrictionTitle = document.getElementById('timeRestrictionTitle');
+        // const timeRestrictionMessage = document.getElementById('timeRestrictionMessage');
 
+        // Lógica de 'DOMContentLoaded' para mostrar el modal de horario ELIMINADA
+        // document.addEventListener('DOMContentLoaded', () => { ... });
+        // closeTimeModalBtn.addEventListener('click', () => { ... });
+        // timeRestrictionModal.addEventListener('click', (event) => { ... });
+        
+        function showAttendanceForm() {
             attendeeNameInput.value = ''; 
             attendeeAccompanimentsInput.value = '0'; 
             modalMessage.classList.add('hidden'); 
             modalErrorMessage.classList.add('hidden'); 
-            
             attendeeNameInput.disabled = false;
             attendeeAccompanimentsInput.disabled = false;
             submitAttendanceBtn.disabled = false;
+            submitAttendanceBtn.textContent = 'Enviar Confirmación';
             attendanceModal.classList.add('show');
         }
 
-        // Función para mostrar error de servidor no disponible en el modal de asistencia
-        function showServerErrorInAttendanceModal() {
-            attendanceInstructions.classList.add('hidden'); // Ocultar instrucciones
-            attendeeNameInput.classList.add('hidden'); // Ocultar input nombre
-            attendeeAccompanimentsInput.classList.add('hidden'); // Ocultar input acompañantes
-            submitAttendanceBtn.classList.add('hidden'); // Ocultar botón de envío
-
-            modalMessage.classList.add('hidden');
-            modalErrorMessage.textContent = 'El servidor no está disponible en este momento. Por favor, intente más tarde.';
-            modalErrorMessage.classList.remove('hidden');
-            attendanceModal.classList.add('show');
-        }
-
-
-        // --- Lógica del Modal de Confirmación de Asistencia ---
-        confirmAttendanceBtn.addEventListener('click', async () => {
-            const now = new Date();
-            const currentHour = now.getHours();
-
-            // Limpiar mensajes previos en el modal de asistencia
+        confirmAttendanceBtn.addEventListener('click', () => {
+            // Limpiar mensajes previos
             modalMessage.classList.add('hidden');
             modalErrorMessage.classList.add('hidden');
 
-            if (currentHour >= 18 && currentHour < 22) { // Entre 6:00 PM y 9:59 PM
-                // Dentro del horario permitido, verificar si el backend responde
-                try {
-                    // Usamos 'OPTIONS' como una solicitud ligera para verificar la disponibilidad del servidor.
-                    // No necesitamos procesar la respuesta, solo ver si la conexión es exitosa.
-                    // Se establece un timeout corto para no hacer esperar mucho al usuario.
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 3000); // Timeout de 3 segundos
-
-                    await fetch(backendUrl, { method: 'OPTIONS', signal: controller.signal });
-                    clearTimeout(timeoutId); // Limpiar el timeout si la respuesta llega a tiempo
-                    
-                    // Si el fetch fue exitoso (servidor respondió), mostrar el formulario de asistencia
-                    showAttendanceForm();
-
-                } catch (error) {
-                    // Si hay un error de red o timeout, el servidor no está disponible
-                    console.error('Error al verificar el backend:', error);
-                    showServerErrorInAttendanceModal();
-                }
-            } else {
-                // Fuera de horario, mostrar el modal de restricción de horario
-                timeRestrictionTitle.textContent = 'Aviso Importante';
-                timeRestrictionMessage.innerHTML = 'La confirmación de asistencia solo está disponible entre las <span class="font-semibold">6:00 PM y las 10:00 PM</span>. Agradecemos tu comprensión.';
-                timeRestrictionModal.classList.add('show');
-            }
+            // Mostrar directamente el formulario de asistencia
+            showAttendanceForm();
         });
 
         closeAttendanceModalBtn.addEventListener('click', () => {
@@ -318,7 +250,6 @@
             }
         });
 
-        // Manejar el envío del formulario de asistencia
         submitAttendanceBtn.addEventListener('click', async () => {
             const attendeeName = attendeeNameInput.value.trim();
             const accompaniments = parseInt(attendeeAccompanimentsInput.value, 10);
@@ -339,49 +270,41 @@
             modalMessage.classList.add('hidden'); 
             modalErrorMessage.classList.add('hidden'); 
             submitAttendanceBtn.disabled = true; 
+            submitAttendanceBtn.textContent = 'Enviando...';
+
+            const formData = new FormData();
+            formData.append(NAME_FIELD_ID, attendeeName);
+            formData.append(ACCOMPANIMENTS_FIELD_ID, accompaniments.toString());
 
             try {
-                const response = await fetch(backendUrl, { // Usar la variable backendUrl
+                await fetch(GOOGLE_FORM_ACTION_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ name: attendeeName, accompaniments: accompaniments }),
+                    body: formData,
+                    mode: 'no-cors' 
                 });
 
-                let result;
-                try {
-                    result = await response.json();
-                } catch (jsonError) {
-                    console.error('Error al parsear JSON de respuesta:', jsonError);
-                    result = { status: "error", message: "Respuesta inesperada del servidor." };
-                }
-
-                if (response.ok && result.status === 'success') {
-                    let confirmationText = `¡Gracias, ${attendeeName}! Tu asistencia`;
-                    if (accompaniments > 0) {
-                        confirmationText += ` y la de tus ${accompaniments} acompañante(s)`;
-                    }
-                    confirmationText += ` ha sido confirmada. ¡Te esperamos!`; // Mensaje simplificado
-                    
-                    modalMessage.textContent = confirmationText;
-                    modalMessage.classList.remove('hidden');
-                    modalErrorMessage.classList.add('hidden');
-                    attendeeNameInput.disabled = true; 
-                    attendeeAccompanimentsInput.disabled = true;
-                    // submitAttendanceBtn ya está deshabilitado
+                let confirmationText = `¡Gracias, ${attendeeName}! Tu asistencia`;
+                if (accompaniments === 1) {
+                    confirmationText += ` y la de tu acompañante han sido confirmadas.`;
+                } else if (accompaniments > 1) {
+                    confirmationText += ` y la de tus ${accompaniments} acompañantes han sido confirmadas.`;
                 } else {
-                    modalErrorMessage.textContent = result.message || 'Error al enviar la confirmación. Intenta de nuevo.';
-                    modalErrorMessage.classList.remove('hidden');
-                    modalMessage.classList.add('hidden');
-                    submitAttendanceBtn.disabled = false; 
+                    confirmationText += ` ha sido confirmada.`;
                 }
+                confirmationText += ` ¡Te esperamos! (Los datos han sido enviados a Google Forms).`;
+                
+                modalMessage.textContent = confirmationText;
+                modalMessage.classList.remove('hidden');
+                attendeeNameInput.disabled = true; 
+                attendeeAccompanimentsInput.disabled = true;
+                submitAttendanceBtn.textContent = 'Confirmado';
+
             } catch (error) {
-                console.error('Error en fetch al enviar confirmación:', error);
-                modalErrorMessage.textContent = 'No se pudo conectar con el servidor para enviar la confirmación. Asegúrate de que esté encendido y accesible.';
+                console.error('Error al enviar a Google Forms:', error);
+                modalErrorMessage.textContent = 'Hubo un error al enviar tu confirmación. Por favor, intenta de nuevo o contacta al organizador.';
                 modalErrorMessage.classList.remove('hidden');
-                modalMessage.classList.add('hidden');
                 submitAttendanceBtn.disabled = false; 
+                submitAttendanceBtn.textContent = 'Enviar Confirmación';
             }
         });
     </script>
