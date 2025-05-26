@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invitación de Graduación</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom right, #f8f8f8, #e8e8e8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .invite-card {
+            background-color: #ffffff;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            max-width: 500px;
+            width: 100%;
+            border-radius: 1.75rem;
+            overflow: hidden;
+        }
+        .graduation-cap-icon {
+            width: 75px;
+            height: 75px;
+            fill: #555;
+        }
+        .confirm-button {
+            background-image: linear-gradient(to right, #606060, #404040);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        .confirm-button:hover {
+            background-image: linear-gradient(to right, #404040, #606060);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+            transform: translateY(-3px);
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 90%;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+        .modal-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        .modal-submit-btn {
+            background-color: #606060;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        .modal-submit-btn:hover {
+            background-color: #404040;
+        }
+        .modal-close-btn {
+            background-color: #e0e0e0;
+            color: #333;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+        .modal-close-btn:hover {
+            background-color: #d0d0d0;
+        }
+        .message-box {
+            background-color: #f0fdf4;
+            border: 1px solid #dcfce7;
+            color: #16a34a;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .error-message-box {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #ef4444;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="invite-card p-8 md:p-12 rounded-xl text-center space-y-6">
+        <div class="flex justify-center mb-4">
+            <svg class="graduation-cap-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 10.5V6.5C22 6.22386 21.7761 6 21.5 6H2.5C2.22386 6 2 6.22386 2 6.5V10.5C2 10.7761 2.22386 11 2.5 11H21.5C21.7761 11 22 10.7761 22 10.5ZM12 14.5C12 14.7761 11.7761 15 11.5 15H2.5C2.22386 15 2 14.7761 2 14.5V10.5C2 10.2239 2.22386 10 2.5 10H11.5C11.7761 10 12 10.2239 12 10.5V14.5ZM21.5 15H12.5C12.2239 15 12 14.7761 12 14.5V10.5C12 10.2239 12.2239 10 12.5 10H21.5C21.7761 10 22 10.2239 22 10.5V14.5ZM12 18.5C12 18.7761 11.7761 19 11.5 19H2.5C2.22386 19 2 18.7761 2 18.5V14.5C2 14.2239 2.22386 14 2.5 14H11.5C11.7761 14 12 14.2239 12 14.5V18.5ZM21.5 19H12.5C12.2239 19 12 18.7761 12 18.5V14.5C12 14.2239 12.2239 14 12.5 14H21.5C21.7761 19 22 18.7761 22 18.5V14.5Z" fill="currentColor"/>
+                <path d="M12 2C12 1.44772 11.5523 1 11 1H3C2.44772 1 2 1.44772 2 2V3C2 3.55228 2.44772 4 3 4H11C11.5523 4 12 3.55228 12 3V2Z" fill="currentColor"/>
+                <path d="M22 2C22 1.44772 21.5523 1 21 1H13C12.4477 1 12 1.44772 12 2V3C12 3.55228 12.4477 4 13 4H21C21.5523 4 22 3.55228 22 3V2Z" fill="currentColor"/>
+            </svg>
+        </div>
+
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">¡Un Nuevo Capítulo Comienza!</h1>
+        <p class="text-xl md:text-2xl text-gray-700 mb-4">Vanessa Elizabeth</p>
+
+        <p class="text-lg text-gray-600 leading-relaxed">
+            Con inmensa alegría, te invito a celebrar la culminación de mis estudios en
+            <span class="font-semibold text-gray-800">Mercadeo Internacional</span>.
+            ¡Es un honor compartir este momento contigo!
+        </p>
+
+        <div class="space-y-2 mt-6">
+            <p class="text-md text-gray-700">
+                <span class="font-medium">Lugar de Celebración:</span> Mi casa
+            </p>
+            <p class="text-md text-gray-700">
+                <span class="font-medium">Fecha:</span> [Fecha del evento]
+            </p>
+            <p class="text-md text-gray-700">
+                <span class="font-medium">Hora:</span> Por confirmar
+            </p>
+        </div>
+
+        <p class="text-md text-gray-600 mt-6">
+            Tu presencia haría este día aún más especial.
+            Agradecería mucho que pudieras confirmar tu asistencia.
+        </p>
+
+        <button id="confirmAttendanceBtn" class="inline-block confirm-button text-white font-semibold py-3 px-8 rounded-full mt-8">
+            Confirmar Asistencia
+        </button>
+
+        <p class="text-sm text-gray-500 mt-6">
+            ¡Te espero para celebrar juntos!
+        </p>
+    </div>
+
+    <div id="timeRestrictionModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="timeRestrictionTitle" class="text-2xl font-bold text-gray-800 mb-4">Aviso Importante</h2>
+            <p id="timeRestrictionMessage" class="text-gray-600 mb-4">
+                La confirmación de asistencia solo está disponible entre las <span class="font-semibold">6:00 PM y las 10:00 PM</span>.
+                Agradecemos tu comprensión.
+            </p>
+            <button id="closeTimeModalBtn" class="modal-close-btn w-full">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <div id="attendanceModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Confirmar Asistencia</h2>
+            <p id="attendanceInstructions" class="text-gray-600 mb-4">
+                Por favor, introduce tu nombre completo y el número de acompañantes.
+            </p>
+            <input type="text" id="attendeeNameInput" class="modal-input" placeholder="Tu nombre completo" required>
+            <input type="number" id="attendeeAccompanimentsInput" class="modal-input" placeholder="Número de acompañantes (ej. 0, 1, 2)" min="0" value="0">
+            <div id="modalMessage" class="message-box hidden"></div>
+            <div id="modalErrorMessage" class="error-message-box hidden"></div>
+            <div class="flex justify-end gap-2 mt-4">
+                <button id="submitAttendanceBtn" class="modal-submit-btn">
+                    Enviar Confirmación
+                </button>
+                <button id="closeAttendanceModalBtn" class="modal-close-btn">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Obtener referencias a los elementos del DOM
+        const confirmAttendanceBtn = document.getElementById('confirmAttendanceBtn');
+        const attendanceModal = document.getElementById('attendanceModal');
+        const closeAttendanceModalBtn = document.getElementById('closeAttendanceModalBtn');
+        const submitAttendanceBtn = document.getElementById('submitAttendanceBtn');
+        const attendeeNameInput = document.getElementById('attendeeNameInput');
+        const attendeeAccompanimentsInput = document.getElementById('attendeeAccompanimentsInput');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalErrorMessage = document.getElementById('modalErrorMessage');
+        const attendanceInstructions = document.getElementById('attendanceInstructions');
+
+
+        const timeRestrictionModal = document.getElementById('timeRestrictionModal');
+        const closeTimeModalBtn = document.getElementById('closeTimeModalBtn');
+        const timeRestrictionTitle = document.getElementById('timeRestrictionTitle');
+        const timeRestrictionMessage = document.getElementById('timeRestrictionMessage');
+
+        const backendUrl = 'http://localhost:5000/submit_attendance'; // URL del backend
+
+        // --- Lógica del Modal de Horario de Confirmación (Aviso inicial) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Restaura el mensaje original del modal de restricción de horario
+            timeRestrictionTitle.textContent = 'Aviso Importante';
+            timeRestrictionMessage.innerHTML = 'La confirmación de asistencia solo está disponible entre las <span class="font-semibold">6:00 PM y las 10:00 PM</span>. Agradecemos tu comprensión.';
+            timeRestrictionModal.classList.add('show');
+        });
+
+        closeTimeModalBtn.addEventListener('click', () => {
+            timeRestrictionModal.classList.remove('show');
+        });
+
+        timeRestrictionModal.addEventListener('click', (event) => {
+            if (event.target === timeRestrictionModal) {
+                timeRestrictionModal.classList.remove('show');
+            }
+        });
+        
+        // Función para mostrar el formulario de asistencia normal
+        function showAttendanceForm() {
+            attendanceInstructions.classList.remove('hidden'); // Mostrar instrucciones
+            attendeeNameInput.classList.remove('hidden'); // Mostrar input nombre
+            attendeeAccompanimentsInput.classList.remove('hidden'); // Mostrar input acompañantes
+            submitAttendanceBtn.classList.remove('hidden'); // Mostrar botón de envío
+
+            attendeeNameInput.value = ''; 
+            attendeeAccompanimentsInput.value = '0'; 
+            modalMessage.classList.add('hidden'); 
+            modalErrorMessage.classList.add('hidden'); 
+            
+            attendeeNameInput.disabled = false;
+            attendeeAccompanimentsInput.disabled = false;
+            submitAttendanceBtn.disabled = false;
+            attendanceModal.classList.add('show');
+        }
+
+        // Función para mostrar error de servidor no disponible en el modal de asistencia
+        function showServerErrorInAttendanceModal() {
+            attendanceInstructions.classList.add('hidden'); // Ocultar instrucciones
+            attendeeNameInput.classList.add('hidden'); // Ocultar input nombre
+            attendeeAccompanimentsInput.classList.add('hidden'); // Ocultar input acompañantes
+            submitAttendanceBtn.classList.add('hidden'); // Ocultar botón de envío
+
+            modalMessage.classList.add('hidden');
+            modalErrorMessage.textContent = 'El servidor no está disponible en este momento. Por favor, intente más tarde.';
+            modalErrorMessage.classList.remove('hidden');
+            attendanceModal.classList.add('show');
+        }
+
+
+        // --- Lógica del Modal de Confirmación de Asistencia ---
+        confirmAttendanceBtn.addEventListener('click', async () => {
+            const now = new Date();
+            const currentHour = now.getHours();
+
+            // Limpiar mensajes previos en el modal de asistencia
+            modalMessage.classList.add('hidden');
+            modalErrorMessage.classList.add('hidden');
+
+            if (currentHour >= 18 && currentHour < 22) { // Entre 6:00 PM y 9:59 PM
+                // Dentro del horario permitido, verificar si el backend responde
+                try {
+                    // Usamos 'OPTIONS' como una solicitud ligera para verificar la disponibilidad del servidor.
+                    // No necesitamos procesar la respuesta, solo ver si la conexión es exitosa.
+                    // Se establece un timeout corto para no hacer esperar mucho al usuario.
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 3000); // Timeout de 3 segundos
+
+                    await fetch(backendUrl, { method: 'OPTIONS', signal: controller.signal });
+                    clearTimeout(timeoutId); // Limpiar el timeout si la respuesta llega a tiempo
+                    
+                    // Si el fetch fue exitoso (servidor respondió), mostrar el formulario de asistencia
+                    showAttendanceForm();
+
+                } catch (error) {
+                    // Si hay un error de red o timeout, el servidor no está disponible
+                    console.error('Error al verificar el backend:', error);
+                    showServerErrorInAttendanceModal();
+                }
+            } else {
+                // Fuera de horario, mostrar el modal de restricción de horario
+                timeRestrictionTitle.textContent = 'Aviso Importante';
+                timeRestrictionMessage.innerHTML = 'La confirmación de asistencia solo está disponible entre las <span class="font-semibold">6:00 PM y las 10:00 PM</span>. Agradecemos tu comprensión.';
+                timeRestrictionModal.classList.add('show');
+            }
+        });
+
+        closeAttendanceModalBtn.addEventListener('click', () => {
+            attendanceModal.classList.remove('show');
+        });
+
+        attendanceModal.addEventListener('click', (event) => {
+            if (event.target === attendanceModal) {
+                attendanceModal.classList.remove('show');
+            }
+        });
+
+        // Manejar el envío del formulario de asistencia
+        submitAttendanceBtn.addEventListener('click', async () => {
+            const attendeeName = attendeeNameInput.value.trim();
+            const accompaniments = parseInt(attendeeAccompanimentsInput.value, 10);
+
+            if (!attendeeName) {
+                modalErrorMessage.textContent = 'Por favor, introduce tu nombre completo.';
+                modalErrorMessage.classList.remove('hidden');
+                modalMessage.classList.add('hidden');
+                return;
+            }
+            if (isNaN(accompaniments) || accompaniments < 0) {
+                modalErrorMessage.textContent = 'El número de acompañantes no es válido. Debe ser un número igual o mayor a 0.';
+                modalErrorMessage.classList.remove('hidden');
+                modalMessage.classList.add('hidden');
+                return;
+            }
+
+            modalMessage.classList.add('hidden'); 
+            modalErrorMessage.classList.add('hidden'); 
+            submitAttendanceBtn.disabled = true; 
+
+            try {
+                const response = await fetch(backendUrl, { // Usar la variable backendUrl
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name: attendeeName, accompaniments: accompaniments }),
+                });
+
+                let result;
+                try {
+                    result = await response.json();
+                } catch (jsonError) {
+                    console.error('Error al parsear JSON de respuesta:', jsonError);
+                    result = { status: "error", message: "Respuesta inesperada del servidor." };
+                }
+
+                if (response.ok && result.status === 'success') {
+                    let confirmationText = `¡Gracias, ${attendeeName}! Tu asistencia`;
+                    if (accompaniments > 0) {
+                        confirmationText += ` y la de tus ${accompaniments} acompañante(s)`;
+                    }
+                    confirmationText += ` ha sido confirmada. ¡Te esperamos!`; // Mensaje simplificado
+                    
+                    modalMessage.textContent = confirmationText;
+                    modalMessage.classList.remove('hidden');
+                    modalErrorMessage.classList.add('hidden');
+                    attendeeNameInput.disabled = true; 
+                    attendeeAccompanimentsInput.disabled = true;
+                    // submitAttendanceBtn ya está deshabilitado
+                } else {
+                    modalErrorMessage.textContent = result.message || 'Error al enviar la confirmación. Intenta de nuevo.';
+                    modalErrorMessage.classList.remove('hidden');
+                    modalMessage.classList.add('hidden');
+                    submitAttendanceBtn.disabled = false; 
+                }
+            } catch (error) {
+                console.error('Error en fetch al enviar confirmación:', error);
+                modalErrorMessage.textContent = 'No se pudo conectar con el servidor para enviar la confirmación. Asegúrate de que esté encendido y accesible.';
+                modalErrorMessage.classList.remove('hidden');
+                modalMessage.classList.add('hidden');
+                submitAttendanceBtn.disabled = false; 
+            }
+        });
+    </script>
+</body>
+</html>
